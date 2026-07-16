@@ -1,0 +1,16 @@
+{
+  "name": "expense-tracker",
+  "version": "1.0.0",
+  "description": "Full-stack Mini Expense Tracker — React + Node.js + MongoDB",
+  "private": true,
+  "scripts": {
+    "server": "cd server && /snap/bin/npm run dev",
+    "client": "cd client && /snap/bin/npm run dev",
+    "install:all": "/snap/bin/npm install --prefix server && /snap/bin/npm install --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev:snap": "/snap/bin/node node_modules/.bin/concurrently \"/snap/bin/npm run server\" \"/snap/bin/npm run client\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
