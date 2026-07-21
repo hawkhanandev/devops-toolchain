@@ -39,19 +39,6 @@ pipeline {
       }
     }
 
-    stage('Debug Workspace') {
-      steps {
-        sh '''
-            pwd
-            ls -la
-            cd "$PROJECT_DIR"
-            pwd
-            ls -la
-            find . -maxdepth 2
-        '''
-      }
-    }
-
     stage('SonarQube Analysis') {
       steps {
         sh '''
@@ -74,7 +61,7 @@ pipeline {
       steps {
         sh '''
           cd "$PROJECT_DIR"
-          docker compose -f docker-compose.app.yml build server client
+          docker-compose -f docker-compose.app.yml build server client
         '''
       }
     }
@@ -83,7 +70,7 @@ pipeline {
       steps {
         sh '''
           cd "$PROJECT_DIR"
-          docker compose -f docker-compose.app.yml up -d
+          docker-compose -f docker-compose.app.yml up -d
         '''
       }
     }
