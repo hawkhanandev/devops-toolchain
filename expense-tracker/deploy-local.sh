@@ -20,5 +20,5 @@ for i in $(seq 1 60); do
 done
 
 echo "[4/4] Deployment complete."
-echo "Frontend: http://localhost:8080"
+echo "Frontend: http://localhost:3000"
 echo "Backend health: http://localhost:5000/api/health"

@@ -17,7 +17,7 @@ A complete DevOps toolchain demonstrating Git workflow, Docker, Docker Compose, 
 
 ## Run locally
 - Start the full toolchain: docker compose -f expense-tracker/docker-compose.yml up --build -d
-- Open the frontend at http://localhost:8080
+- Open the frontend at http://localhost:3000
 - Open the backend at http://localhost:5000/api/health
 - Open SonarQube at http://localhost:9000
 - Open Jenkins at http://localhost:8080
