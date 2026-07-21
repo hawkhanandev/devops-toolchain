@@ -2,8 +2,14 @@ pipeline {
   agent any
 
   environment {
+    PROJECT_DIR = 'expense-tracker'
     SONAR_HOST_URL = 'http://sonarqube:9000'
     SONAR_LOGIN = credentials('sonarqube-token')
+  }
+
+  options {
+    timestamps()
+    timeout(time: 45, unit: 'MINUTES')
   }
 
   stages {
@@ -15,37 +21,71 @@ pipeline {
 
     stage('Install dependencies') {
       steps {
-        sh 'cd expense-tracker && npm install --prefix server && npm install --prefix client'
+        sh '''
+          cd "$PROJECT_DIR"
+          npm install --prefix server
+          npm install --prefix client
+        '''
       }
     }
 
-    stage('Build frontend') {
+    stage('Lint and build frontend') {
       steps {
-        sh 'cd expense-tracker/client && npm run build'
+        sh '''
+          cd "$PROJECT_DIR/client"
+          npm run lint
+          npm run build
+        '''
       }
     }
 
     stage('SonarQube Analysis') {
       steps {
-        sh '''cd expense-tracker && \
-        sonar-scanner \
-          -Dsonar.projectKey=expense-tracker \
-          -Dsonar.sources=. \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.login=$SONAR_LOGIN'''
+        sh '''
+          cd "$PROJECT_DIR"
+          docker run --rm \
+            -e SONAR_HOST_URL="$SONAR_HOST_URL" \
+            -e SONAR_LOGIN="$SONAR_LOGIN" \
+            -v "$PWD":/usr/src \
+            -w /usr/src \
+            sonarsource/sonar-scanner-cli:latest \
+            -Dsonar.host.url="$SONAR_HOST_URL" \
+            -Dsonar.login="$SONAR_LOGIN" \
+            -Dsonar.projectKey=expense-tracker \
+            -Dsonar.projectName='Expense Tracker' \
+            -Dsonar.projectVersion=1.0 \
+            -Dsonar.sources=client/src,server \
+            -Dsonar.exclusions='**/node_modules/**,**/dist/**,**/build/**' \
+            -Dsonar.sourceEncoding=UTF-8
+        '''
       }
     }
 
     stage('Build Docker images') {
       steps {
-        sh 'cd expense-tracker && docker compose build server client'
+        sh '''
+          cd "$PROJECT_DIR"
+          docker compose -f docker-compose.app.yml build server client
+        '''
       }
     }
 
     stage('Deploy locally with Docker Compose') {
       steps {
-        sh 'cd expense-tracker && docker compose up -d'
+        sh '''
+          cd "$PROJECT_DIR"
+          docker compose -f docker-compose.app.yml up -d
+        '''
       }
+    }
+  }
+
+  post {
+    success {
+      echo 'CI/CD pipeline completed successfully.'
+    }
+    failure {
+      echo 'CI/CD pipeline failed. Review the Jenkins console output and SonarQube results.'
     }
   }
 }

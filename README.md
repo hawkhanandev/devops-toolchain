@@ -16,8 +16,15 @@ A complete DevOps toolchain demonstrating Git workflow, Docker, Docker Compose, 
 5. It deploys the stack locally with Docker Compose.
 
 ## Run locally
-- Start the app stack: docker compose up --build
-- Open the frontend at http://localhost:5173
+- Start the full toolchain: docker compose -f expense-tracker/docker-compose.yml up --build -d
+- Open the frontend at http://localhost:8080
 - Open the backend at http://localhost:5000/api/health
 - Open SonarQube at http://localhost:9000
 - Open Jenkins at http://localhost:8080
+
+## CI/CD setup
+1. Start the shared services: docker compose -f expense-tracker/docker-compose.yml up -d mongo jenkins sonarqube
+2. Open Jenkins and SonarQube, then sign in with the defaults if prompted.
+3. In SonarQube, create a project named expense-tracker and generate a token. Store that token in Jenkins as a secret credential named sonarqube-token.
+4. In Jenkins, create a new Pipeline job pointing to this repository and use the included Jenkinsfile.
+5. Run the pipeline to install dependencies, lint and build the frontend, scan code with SonarQube, build Docker images, and deploy the app stack.

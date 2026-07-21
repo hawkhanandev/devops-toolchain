@@ -3,14 +3,14 @@ services:
     image: mongo:7
     container_name: expense-mongo
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongo-data:/data/db
 
   server:
     build:
       context: ./server
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     container_name: expense-server
     environment:
       MONGO_URI: mongodb://mongo:27017/expense-tracker
@@ -23,7 +23,7 @@ services:
   client:
     build:
       context: ./client
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
       args:
         VITE_API_URL: http://localhost:5000/api
     container_name: expense-client
@@ -33,13 +33,27 @@ services:
       - server
 
   jenkins:
-    image: jenkins/jenkins:lts-jdk17
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     container_name: jenkins
+    user: root
+    privileged: true
     ports:
       - "8080:8080"
       - "50000:50000"
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
     volumes:
       - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/login >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 45s
 
   sonarqube:
     image: sonarqube:community
@@ -52,6 +66,13 @@ services:
       - sonarqube-data:/opt/sonarqube/data
       - sonarqube-logs:/opt/sonarqube/logs
       - sonarqube-extensions:/opt/sonarqube/extensions
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/api/system/status | grep -q 'UP' || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
 
 volumes:
   mongo-data:
