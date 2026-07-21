@@ -40,26 +40,28 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-      steps {
+    steps {
         sh '''
-          cd "$PROJECT_DIR"
-          docker run --rm \
-            -e SONAR_HOST_URL="$SONAR_HOST_URL" \
-            -e SONAR_LOGIN="$SONAR_LOGIN" \
-            -v "$PWD":/usr/src \
-            -w /usr/src \
-            sonarsource/sonar-scanner-cli:latest \
-            -Dsonar.host.url="$SONAR_HOST_URL" \
-            -Dsonar.login="$SONAR_LOGIN" \
-            -Dsonar.projectKey=expense-tracker \
-            -Dsonar.projectName='Expense Tracker' \
-            -Dsonar.projectVersion=1.0 \
-            -Dsonar.sources=client/src,server \
-            -Dsonar.exclusions='**/node_modules/**,**/dist/**,**/build/**' \
-            -Dsonar.sourceEncoding=UTF-8
+            cd "$PROJECT_DIR"
+
+            docker run --rm \
+              --network expense-tracker_default \
+              -e SONAR_HOST_URL="$SONAR_HOST_URL" \
+              -e SONAR_LOGIN="$SONAR_LOGIN" \
+              -v "$PWD":/usr/src \
+              -w /usr/src \
+              sonarsource/sonar-scanner-cli:latest \
+              -Dsonar.host.url="$SONAR_HOST_URL" \
+              -Dsonar.login="$SONAR_LOGIN" \
+              -Dsonar.projectKey=expense-tracker \
+              -Dsonar.projectName="Expense Tracker" \
+              -Dsonar.projectVersion=1.0 \
+              -Dsonar.sources=client/src,server \
+              -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/** \
+              -Dsonar.sourceEncoding=UTF-8
         '''
-      }
     }
+}
 
     stage('Build Docker images') {
       steps {
