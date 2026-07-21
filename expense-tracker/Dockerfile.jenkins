@@ -8,7 +8,15 @@ RUN apt-get update && \
     curl \
     ca-certificates \
     gnupg \
-    lsb-release
+    lsb-release \
+    unzip
+
+# Install SonarScanner CLI 8.0.1.6346
+ARG SONAR_SCANNER_VERSION=8.0.1.6346
+RUN curl -fsSL https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux-x64.zip -o /tmp/sonar-scanner.zip && \
+    unzip /tmp/sonar-scanner.zip -d /opt/ && \
+    ln -s /opt/sonar-scanner-${SONAR_SCANNER_VERSION}-linux-x64/bin/sonar-scanner /usr/local/bin/sonar-scanner && \
+    rm /tmp/sonar-scanner.zip
 
 # Install Docker CLI
 RUN apt-get update && \

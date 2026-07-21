@@ -40,7 +40,7 @@ pipeline {
     }
 
     stage('Debug Workspace') {
-    steps {
+      steps {
         sh '''
             pwd
             ls -la
@@ -49,21 +49,15 @@ pipeline {
             ls -la
             find . -maxdepth 2
         '''
+      }
     }
-}
 
     stage('SonarQube Analysis') {
-    steps {
+      steps {
         sh '''
             cd "$PROJECT_DIR"
 
-            docker run --rm \
-              --network expense-tracker_default \
-              -e SONAR_HOST_URL="$SONAR_HOST_URL" \
-              -e SONAR_LOGIN="$SONAR_LOGIN" \
-              -v "$PWD":/usr/src \
-              -w /usr/src \
-              sonarsource/sonar-scanner-cli:latest \
+            sonar-scanner \
               -Dsonar.host.url="$SONAR_HOST_URL" \
               -Dsonar.login="$SONAR_LOGIN" \
               -Dsonar.projectKey=expense-tracker \
@@ -73,8 +67,8 @@ pipeline {
               -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/** \
               -Dsonar.sourceEncoding=UTF-8
         '''
+      }
     }
-}
 
     stage('Build Docker images') {
       steps {
