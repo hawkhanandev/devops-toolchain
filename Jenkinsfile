@@ -10,7 +10,16 @@ pipeline {
   options {
     timestamps()
     timeout(time: 45, unit: 'MINUTES')
+    skipDefaultCheckout(true)        // we do checkout manually in stage 1
   }
+
+  triggers {
+    // Poll GitHub every minute for new commits on the configured branch.
+    // Jenkins checks → if new commit found → auto-runs the pipeline.
+    // (Use GitHub Webhook instead if Jenkins is publicly reachable)
+    pollSCM('* * * * *')
+  }
+
 
   stages {
     stage('Checkout') {
